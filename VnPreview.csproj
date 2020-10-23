@@ -2,8 +2,10 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <AzureFunctionsVersion>v2</AzureFunctionsVersion>
+    <RootNamespace>Vendanor.Preview</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Flurl" Version="2.8.2" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="1.0.36" />
   </ItemGroup>
   <ItemGroup>
