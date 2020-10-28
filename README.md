@@ -20,21 +20,6 @@ which is currently in preview (28.10-20) and has some limitations.
 
 Static resources in Azure static storage are deployed by Github action build script on PR changes (see [VnPreviewActions](https://github.com/vendanor/VnPreviewActions)).
 
-
-## Alternative solutions
-
-We explored some alternative solutions:
-1. Azure static web apps
-2. Subfolders on azure static storage
-
-Azure static web apps is a good plug and play solution, but has a max limit of 1 PR while in preview. We also loose some control of our build script / CI setup.
-
-Subfolders works, but has the following limitations:
-- All assets / references needs to be relative (this should ideally be the case anyway)
-- Need to pass parameters to build to get correct path
-- Some (solvable) ssues with deep linking. (cannot use just azure function proxies, need custom code)
-- Url looks bad (?)
-
 ## Azure setup
 
 Create a Azure function app `my-preview-app`
@@ -69,6 +54,10 @@ Setup proxies:
 ```
 
 Add custom domain: `*.preview-azure.domain.com` (no ssl needed, handled by nginx)
+
+Add the followin app settings to azure function app:
+PREVIEW_BASE_URL = preview-azure.domain.com
+STATIC_BASE_URL = https://mystaticstorageaccount.z6.web.etc.net
 
 ## Ngnix reverse proxy setup
 
