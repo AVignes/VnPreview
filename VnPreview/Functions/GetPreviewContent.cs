@@ -93,6 +93,8 @@ namespace Vendanor.Preview.Functions
                 var lastSegment = uri.Segments[uri.Segments.Length - 1];
                 var lastSegmentHasFileExtension = lastSegment.Contains(".");
 
+                // TODO: problem.. dots are valid in last segment too.. without beeing a file..
+
                 if (!lastSegmentHasFileExtension)
                 {
                     log.LogDebug("==> We have a DEEP LINK, let's return index.html and let static app fix routing");
