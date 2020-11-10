@@ -18,7 +18,7 @@ which is currently in preview (28.10-20) and has some limitations.
   by azure function proxy to function `GetPreviewContent` as query parameter `restOfPath`.
 - `GetPreviewContent` proxy requests to correct Azure static storage: `https://mystaticstore.z6.web.core.windows.net/myapp/278/b2e7537`
 
-Static resources in Azure static storage are deployed by Github action build script on PR changes (see [VnPreviewActions](https://github.com/vendanor/VnPreviewActions)).
+Static resources in Azure static storage are deployed by Github action build script on PR changes (see [VnPreviewActions](https://github.com/vendanor/VnPreviewAction)).
 
 ## Azure setup
 
