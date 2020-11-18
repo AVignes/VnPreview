@@ -4,6 +4,12 @@ namespace Vendanor.Preview.DeepLinkDetection
 {
     public static class UrlHelpers
     {
+        /// <summary>
+        /// It's not possible to detect if url is a static file or not.
+        /// Example false positive: https://app.com/refund/customer/email@isvalidinurl.com
+        /// </summary>
+        /// <param name="inputUrl"></param>
+        /// <returns></returns>
         public static bool IsUrlProbablyFile(string inputUrl)
         {
             var uri = new Uri(inputUrl);
@@ -16,10 +22,6 @@ namespace Vendanor.Preview.DeepLinkDetection
                 return false;
             }
 
-            // false positive:             Assert.IsTrue(_strategy.GetIsDeepLink("https://app.com/refund/customer/email@isvalidinurl.com"));
-
-
-            // 4 characters dot detection strategy.. works for now?
             if (lastSegmentHasFileExtension)
             {
                 var parts = lastSegment.Split(".");
