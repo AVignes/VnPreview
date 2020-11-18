@@ -104,9 +104,6 @@ namespace Vendanor.Preview.DeepLinkDetection
                 return true;
             }
 
-            // temporary hard coded:
-            // var whitelist = new List<string> {"/subroute", "/refund", "/refund/customer"};
-
             // just checking string.contains for now, should implement some sort of route matching, stars etc.
             foreach (var c in _whitelist)
             {
