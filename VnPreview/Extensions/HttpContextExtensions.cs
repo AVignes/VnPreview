@@ -3,7 +3,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Vendanor.Preview.Common;
+using Vendanor.Preview.Settings;
 
 namespace Vendanor.Preview.Extensions
 {
@@ -79,7 +79,7 @@ namespace Vendanor.Preview.Extensions
 
             using (var responseStream = await responseMessage.Content.ReadAsStreamAsync())
             {
-                var settings = EnvSettings.GetSettings();
+                var settings = AzureSettingsFactory.GetSettings();
                 var size = 2048;
                 if (int.TryParse(settings.StreamCopyBufferSize, out var configBufferSize))
                 {

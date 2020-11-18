@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
@@ -85,9 +86,9 @@ namespace Vendanor.Preview.DeepLinkDetection
     public class RouteWhitelistStrategy : IDeepLinkDetectionStrategy
     {
         private readonly List<string> _whitelist;
-        public RouteWhitelistStrategy(List<string> whitelist)
+        public RouteWhitelistStrategy(List<string>? whitelist)
         {
-            _whitelist = whitelist;
+            _whitelist = whitelist ?? new List<string>();
         }
         public bool GetIsDeepLink(string inputUrl)
         {

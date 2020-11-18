@@ -20,14 +20,14 @@ namespace VnPreview.Tests
 
             // works pretty well, but fails on https://app.com/font.woff, soft 404 (200) for static resources on root
             // also some maintenance required keeping asset folders in sync?
-            // _strategy = new SoftAssetWhitelistStrategy(new []{@"^(/assets)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"});
+            _strategy = new SoftAssetWhitelistStrategy(new []{@"^(/assets)\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)"});
 
             // this returns soft 404 (200) for all static resources, no actual 404s with this
             // _strategy = new SoftStrategy();
 
             // this works on all tests. But requires maintenance + settings per preview / app..
-            var routes = new List<string> {"/subroute", "refund", "/refund/customer"};
-            _strategy = new RouteWhitelistStrategy(routes);
+            // var routes = new List<string> {"/subroute", "refund", "/refund/customer"};
+            // _strategy = new RouteWhitelistStrategy(routes);
         }
 
         [Test]
@@ -83,8 +83,15 @@ namespace VnPreview.Tests
         [Test]
         public void TestAssetFolder()
         {
-            Assert.IsFalse(_strategy.GetIsDeepLink("https://app.com/assets/image.png"));
+            Assert.IsFalse(_strategy.GetIsDeepLink("https://my-122-08a174d.preview.vendanor.com/assets/image.png"));
             Assert.IsFalse(_strategy.GetIsDeepLink("https://app.com/assets/subfolder/image.png"));
+        }
+
+        [Test]
+        public void TestAssetFolderSomeMore()
+        {
+            Assert.IsFalse(_strategy.GetIsDeepLink("/assets/img/vendanor-404.png"));
+            Assert.IsFalse(_strategy.GetIsDeepLink("/assets/subfolder/image.png"));
         }
 
         [Test]

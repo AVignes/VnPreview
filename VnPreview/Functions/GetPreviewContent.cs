@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -9,15 +10,17 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
-using Vendanor.Preview.Common;
 using Vendanor.Preview.DeepLinkDetection;
 using Vendanor.Preview.Extensions;
+using Vendanor.Preview.Settings;
 
 namespace Vendanor.Preview.Functions
 {
     public static class GetPreviewContent
     {
         private static readonly HttpClient Client = new HttpClient();
+
+        private static Dictionary<string, AppInstanceSettings> appInstanceSettings;
 
         /// <summary>
         /// Main reverse proxy function
@@ -34,13 +37,14 @@ namespace Vendanor.Preview.Functions
         {
             log.LogDebug("🎈🎈🎈 GetPreviewContent 🎈🎈🎈");
 
+            var azureSettings = AzureSettingsFactory.GetSettings();
+
             // Get disguised host, example: vnmfa-278-b2e7537.preview.domain.com/
             var disguisedHost = req.Headers["DISGUISED-HOST"].ToString();
             var host = !string.IsNullOrEmpty(disguisedHost) ? disguisedHost : req.Host.Host;
 
-            var settings = EnvSettings.GetSettings();
 
-            var subdomain = host.Replace(settings.PreviewBaseUrl!, "").TrimEnd('.');
+            var subdomain = host.Replace(azureSettings.PreviewBaseUrl!, "").TrimEnd('.');
             var hasSubdomain = subdomain.Length > 0;
             var rx = new Regex(@"\w+-{1}\d+-{1}\w+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
             var isMatch = rx.IsMatch(subdomain);
@@ -68,7 +72,7 @@ namespace Vendanor.Preview.Functions
             // NOTE: this needs to be passed by azure functions proxy:
             var restOfPath = req.Query["restOfPath"];
             var previewUrl = subdomain.Replace("-", "/");
-            var targetUrl = Url.Combine(settings.StaticAssetsBaseUrl, previewUrl, restOfPath);
+            var targetUrl = Url.Combine(azureSettings.StaticAssetsBaseUrl, previewUrl, restOfPath);
 
             log.LogDebug("restOfPath: " + restOfPath);
             log.LogDebug("Target url: " + targetUrl);
@@ -79,7 +83,10 @@ namespace Vendanor.Preview.Functions
 
             var response = await Client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, req.HttpContext
             .RequestAborted).ConfigureAwait(false);
-            log.LogInformation("response from azure static: " + response.StatusCode);
+            log.LogDebug("response from azure static: " + response.StatusCode);
+
+
+
 
             // Handle deep links.
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -88,14 +95,17 @@ namespace Vendanor.Preview.Functions
 
                 // We either have a real 404 to a static file or a deep link to a route.
                 var lastSegment = uri.Segments[uri.Segments.Length - 1];
-                IDeepLinkDetectionStrategy strategy = Factory.CreateStrategy(settings);
-                log.LogDebug($"Using deep link detection strategy: {strategy.Name}");
-                var isDeepLink = strategy.GetIsDeepLink(targetUrl);
+                var strategy = await DeepLinkDetectionStrategyFactory.CreateStrategy(azureSettings, previewUrl, log);
+
+                var tempod = new Uri("asdf").PathAndQuery;
+
+                var isDeepLink = strategy.GetIsDeepLink(restOfPath);
+                log.LogDebug($"Using deep link detection strategy: {strategy.Name} Url/restOfPath:{restOfPath} IsDeep:{isDeepLink.ToString()} ");
 
                 if (isDeepLink)
                 {
-                    log.LogDebug("==> Deep link detected, returning index.html and let static app fix routing");
-                    var indexUrl = Url.Combine(settings.StaticAssetsBaseUrl, previewUrl, "index.html");
+                    log.LogDebug("==> Deep link detected, returning index.html and let static app handle routing");
+                    var indexUrl = Url.Combine(azureSettings.StaticAssetsBaseUrl, previewUrl, "index.html");
                     log.LogDebug("combined index url:" + indexUrl);
                     var indexRequest = req.HttpContext.CreateProxyHttpRequest(new Uri(indexUrl));
                     var indexResponse = await Client.SendAsync(indexRequest, HttpCompletionOption

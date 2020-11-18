@@ -10,7 +10,7 @@ namespace Vendanor.Preview.DeepLinkDetection
     /// </summary>
     public interface IDeepLinkDetectionStrategy
     {
-        bool GetIsDeepLink(string url);
+        bool GetIsDeepLink(string pathAndQuery);
         string Name { get; }
     }
 }
