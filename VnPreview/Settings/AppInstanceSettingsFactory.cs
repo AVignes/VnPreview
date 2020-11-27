@@ -23,23 +23,29 @@ namespace Vendanor.Preview.Settings
 			}
 
 			var targetUrl = Url.Combine(azureSettings.StaticAssetsBaseUrl, previewUrl,"assets", "vnpreview.json");
+			log.LogDebug("Url getAppSettings: " + targetUrl);
+
 			var request = new HttpRequestMessage(HttpMethod.Get, targetUrl);
 			var response = await Client.SendAsync(request).ConfigureAwait(false);
 
-			log.LogDebug("Url getAppSettings: " + targetUrl);
-
 			if (!response.IsSuccessStatusCode)
 			{
-				throw new Exception($"Could not find required {targetUrl}");
+				throw new LocalSettingsMissingException($"Could not find required {targetUrl}");
 			}
 
 			var raw = await response.Content.ReadAsStringAsync();
 			var appInstanceSettings = await Task.Run(() => JsonConvert.DeserializeObject<AppInstanceSettings>(raw));
 			var greatSuccess = Cache.TryAdd(previewUrl, appInstanceSettings);
-
 			log.LogDebug($"Added to cache: {greatSuccess.ToString()}");
 
 			return appInstanceSettings;
+		}
+	}
+
+	public class LocalSettingsMissingException : Exception
+	{
+		public LocalSettingsMissingException(string message) : base(message)
+		{
 		}
 	}
 }

@@ -95,9 +95,21 @@ namespace Vendanor.Preview.Functions
 
                 // We either have a real 404 to a static file or a deep link to a route.
                 var lastSegment = uri.Segments[uri.Segments.Length - 1];
-                var strategy = await DeepLinkDetectionStrategyFactory.CreateStrategy(azureSettings, previewUrl, log);
+                IDeepLinkDetectionStrategy strategy;
 
-                var tempod = new Uri("asdf").PathAndQuery;
+                try
+                {
+                    strategy = await DeepLinkDetectionStrategyFactory.CreateStrategy(azureSettings, previewUrl, log);
+
+                }
+                catch (LocalSettingsMissingException err)
+                {
+                    return new OkObjectResult(new
+                    {
+                        Message = "Could not create deep link detection strategy, missing local settings",
+                        Description = err.Message
+                    });
+                }
 
                 var isDeepLink = strategy.GetIsDeepLink(restOfPath);
                 log.LogDebug($"Using deep link detection strategy: {strategy.Name} Url/restOfPath:{restOfPath} IsDeep:{isDeepLink.ToString()} ");
