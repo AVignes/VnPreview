@@ -111,6 +111,7 @@ namespace Vendanor.Preview.Functions
                     });
                 }
 
+                log.LogDebug("Check if isDeepLink: " + restOfPath);
                 var isDeepLink = strategy.GetIsDeepLink(restOfPath);
                 log.LogDebug($"Using deep link detection strategy: {strategy.Name} Url/restOfPath:{restOfPath} IsDeep:{isDeepLink.ToString()} ");
 

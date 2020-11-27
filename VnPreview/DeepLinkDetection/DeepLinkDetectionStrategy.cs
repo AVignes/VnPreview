@@ -50,29 +50,44 @@ namespace Vendanor.Preview.DeepLinkDetection
 
         public bool GetIsDeepLink(string inputUrl)
         {
-            var uri = new Uri(inputUrl);
-            var pathAndQuery = uri.PathAndQuery;
-            var lastSegment = uri.Segments[uri.Segments.Length - 1];
-            var lastSegmentEndsWithSlash = lastSegment.EndsWith("/");
-            var lastSegmentEndsWithIndexHtml = lastSegment.EndsWith("index.html");
-            var isOnRoot = pathAndQuery == "/";
+	        try
+	        {
 
-            if (lastSegmentEndsWithSlash || lastSegmentEndsWithIndexHtml || isOnRoot)
-            {
-                return true;
-            }
+		        if (!Uri.IsWellFormedUriString(inputUrl, UriKind.RelativeOrAbsolute))
+		        {
+			        return true; // ?? wuick test..
+		        }
 
-            foreach (var expression in _assetFolderRegex)
-            {
-                var regex = new Regex(expression);
-                if (regex.IsMatch(pathAndQuery))
-                {
-                    // if matched to a static assets folder return false (results in 404)
-                    return false;
-                }
-            }
+		        var uri = new Uri(inputUrl, UriKind.RelativeOrAbsolute); // TODO: this can throw..
+		        var pathAndQuery = uri.PathAndQuery;
+		        var lastSegment = uri.Segments[uri.Segments.Length - 1];
+		        var lastSegmentEndsWithSlash = lastSegment.EndsWith("/");
+		        var lastSegmentEndsWithIndexHtml = lastSegment.EndsWith("index.html");
+		        var isOnRoot = pathAndQuery == "/";
 
-            return true; // soft
+		        if (lastSegmentEndsWithSlash || lastSegmentEndsWithIndexHtml || isOnRoot)
+		        {
+			        return true;
+		        }
+
+		        foreach (var expression in _assetFolderRegex)
+		        {
+			        var regex = new Regex(expression);
+			        if (regex.IsMatch(pathAndQuery))
+			        {
+				        // if matched to a static assets folder return false (results in 404)
+				        return false;
+			        }
+		        }
+
+		        return true; // soft
+	        }
+	        catch
+	        {
+		        // ignored
+	        }
+
+	        return true;
         }
     }
 
